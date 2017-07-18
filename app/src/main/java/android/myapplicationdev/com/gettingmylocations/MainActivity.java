@@ -21,7 +21,9 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 
 public class MainActivity extends AppCompatActivity implements
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements
         btnCheck = (Button) this.findViewById(R.id.btnCheck);
 
         folderLocation = Environment.getExternalStorageDirectory()
-                .getAbsolutePath() + "/Test";
+                .getAbsolutePath() + "/Testing";
 
         File folder = new File(folderLocation);
         if (folder.exists() == false) {
@@ -59,18 +61,7 @@ public class MainActivity extends AppCompatActivity implements
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                File targetFile = new File(folderLocation, "data.txt");
 
-                try {
-                    FileWriter writer = new FileWriter(targetFile, true);
-                    writer.write("Hello world" + "\n");
-                    writer.flush();
-                    writer.close();
-                } catch (Exception e) {
-                    Toast.makeText(MainActivity.this, "Failed to write!",
-                            Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                }
                 Intent i = new Intent(MainActivity.this, MyService.class);
                 startService(i);
                 Toast.makeText(MainActivity.this,
@@ -84,16 +75,35 @@ public class MainActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, MyService.class);
                 stopService(i);
-                Toast.makeText(MainActivity.this,
-                        "Service has stopped",
-                        Toast.LENGTH_SHORT).show();
             }
         });
 
         btnCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                File targetFile = new File(folderLocation, "data.txt");
 
+                if (targetFile.exists() == true){
+                    String data ="";
+                    try {
+                        FileReader reader = new FileReader(targetFile);
+                        BufferedReader br = new BufferedReader(reader);
+                        String line = br.readLine();
+                        while (line != null){
+                            data += line + "\n";
+                            line = br.readLine();
+                            Toast.makeText(MainActivity.this, line,
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        br.close();
+                        reader.close();
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Failed to read!",
+                                Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+
+                }
 
             }
         });
@@ -108,9 +118,23 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLocationChanged(Location location) {
         //the detected location is given by the variable location in the signature
+        double lat = location.getLatitude();
+        double log = location.getLongitude();
 
-        Toast.makeText(this, "Lat : " + location.getLatitude() + " Lng : " +
-                location.getLongitude(), Toast.LENGTH_SHORT).show();
+        File targetFile = new File(folderLocation, "data.txt");
+
+        try {
+            FileWriter writer = new FileWriter(targetFile, true);
+            writer.write(lat + ", " + log + "\n");
+
+            writer.flush();
+            writer.close();
+        } catch (Exception e) {
+            Toast.makeText(MainActivity.this, "Failed to write!",
+                    Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+
     }
 
     @Override
