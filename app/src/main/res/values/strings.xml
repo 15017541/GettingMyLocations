@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">GettingMyLocations</string>
+    <string name="info">Last known location when this Activity started :</string>
+</resources>
